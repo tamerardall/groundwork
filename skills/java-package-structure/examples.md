@@ -73,6 +73,7 @@ Problems:
 - The controller converts exceptions to responses (J-06).
 - The quote service reaches into `CustomerRepository` from another module (J-03).
 - `validate()` and `calculateTotal()` each have one call site and add no domain meaning beyond their bodies (S-03 / J-09).
+- `find()` returns `Optional` but the controller unwraps it into a 404 by hand instead of `orElseThrow` (J-06, J-10).
 
 ## After
 

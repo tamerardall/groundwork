@@ -19,8 +19,8 @@ Bu skill'ler ajana açık ve referans verilebilir kurallar (`S-01`, `J-03`, ...)
 
 | Skill | Ne zaman yüklenir | Ne sağlar |
 |---|---|---|
-| [`structure-rules`](skills/structure-rules/SKILL.md) | Yeni kod yazarken, modül eklerken, helper çıkarırken | Dilden bağımsız S-01–S-05 kuralları ve teslim kontrolü |
-| [`java-package-structure`](skills/java-package-structure/SKILL.md) | Java / Spring Boot işlerinde | Modül bazlı paket yapısı, J-01–J-09 kuralları, [önce/sonra örneği](skills/java-package-structure/examples.md) |
+| [`structure-rules`](skills/structure-rules/SKILL.md) | Yeni kod yazarken, modül eklerken, helper çıkarırken | Dilden bağımsız S-01–S-09 kuralları (dosya ve katman sınırları, tek kullanımlık helper, tekrar kod, hata yönetimi, isimlendirme, spekülatif kod) ve teslim kontrolü |
+| [`java-package-structure`](skills/java-package-structure/SKILL.md) | Java / Spring Boot işlerinde | Modül bazlı paket yapısı, J-01–J-10 kuralları (null safety dahil), [önce/sonra örneği](skills/java-package-structure/examples.md) |
 | [`structure-review`](skills/structure-review/SKILL.md) | Mevcut kodu incelerken veya refactor ederken | Tarama → rapor → davranışı bozmadan adım adım düzeltme |
 
 ### Java paket yapısı

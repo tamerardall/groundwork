@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Skills that reduce structural AI slop in generated code",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "unslop-skills",
       "source": "./",
       "description": "No god files, separated layers, inlined single-use helpers, module-based Java package structure, and a structure review workflow",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Tamer Ardal"
       },

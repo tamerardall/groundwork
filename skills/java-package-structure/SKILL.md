@@ -8,7 +8,7 @@ license: MIT
 
 A module-based package layout for Java / Spring Boot. Each business module owns its own layers (controller, service, repository, model, mapper). Code shared across modules lives in `common`.
 
-This skill applies the core `structure-rules` (S-01 to S-05) to Java. **REQUIRED BACKGROUND:** structure-rules.
+This skill applies the core `structure-rules` (S-01 to S-09) to Java. **REQUIRED BACKGROUND:** structure-rules.
 
 ## The layout
 
@@ -102,6 +102,20 @@ Create a layer package only when it holds a class. A module without a mapper has
 ### J-09: Single-use private methods are inlined (S-03)
 A private method in a service or controller that has one call site is written in place, unless an S-03 exception applies.
 
+### J-10: Null-safe checks and Optional
+Where a value can be null (S-07 decides where), use the null-safe API instead of raw operators:
+
+| Instead of | Use |
+|---|---|
+| `if (x == null)` / `if (x != null)` | `if (Objects.isNull(x))` / `if (Objects.nonNull(x))` |
+| `a.equals(b)` where `a` may be null | `Objects.equals(a, b)` |
+| `if (x == null) throw new NullPointerException(...)` | `Objects.requireNonNull(x, "x must not be null")` |
+| `x != null ? x : fallback` | `Objects.requireNonNullElse(x, fallback)` |
+| a method that returns `null` for "not found" | return `Optional<T>`: `Optional<User> findByEmail(String email)` |
+| `if (opt.isPresent()) { return opt.get(); }` | `opt.map(...)`, `opt.orElseThrow(...)`, `opt.orElse(...)` |
+
+Use `Optional` only as a return type. Not for fields, method parameters or collections: return an empty list instead of `Optional<List<T>>`.
+
 ## Adding a new module
 
 For a new business concept `quote`:
@@ -125,3 +139,5 @@ Create only the DTOs and packages that are actually used (J-07). See `examples.m
 | Controller returns `ResponseEntity<User>` | Return `UserDTO` via `UserMapper` (J-05) |
 | `try { ... } catch (NotFound e) { return ResponseEntity.status(404)... }` in a controller | Let it throw and handle it in `GlobalExceptionHandler` (J-06) |
 | `common/util/QuoteUtil.java` used only by quote | Move the code into `quote/service` (J-02, S-04) |
+| `if (customer != null && customer.getEmail() != null)` | `Objects.nonNull(...)`, or return `Optional` from the lookup (J-10) |
+| `UserRepository.findByEmail` returns `null` when missing | Return `Optional<User>` and use `orElseThrow` in the service (J-10) |
