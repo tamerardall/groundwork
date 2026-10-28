@@ -1,0 +1,15 @@
+{
+  "name": "unslop-skills",
+  "description": "Structure rules for AI coding agents: no god files, separated layers, no single-use helpers, and a module-based Java package layout",
+  "version": "0.1.0",
+  "author": {
+    "name": "Tamer Ardal"
+  },
+  "license": "MIT",
+  "keywords": ["ai-slop", "code-structure", "refactoring", "java", "spring-boot", "package-structure"],
+  "skills": [
+    "./skills/structure-rules",
+    "./skills/java-package-structure",
+    "./skills/structure-review"
+  ]
+}
