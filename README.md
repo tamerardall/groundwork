@@ -20,7 +20,7 @@ These skills give the agent explicit, citable rules (`S-01`, `J-03`, ...) so it 
 | Skill | When it loads | What it gives |
 |---|---|---|
 | [`structure-rules`](skills/structure-rules/SKILL.md) | Writing new code, adding modules, extracting helpers | Language-agnostic rules S-01 to S-09 (file and layer boundaries, single-use helpers, duplicate code, error handling, naming, speculative code) and a delivery check |
-| [`java-package-structure`](skills/java-package-structure/SKILL.md) | Java / Spring Boot work | Module-based package layout, rules J-01 to J-10 (including null safety), [before/after example](skills/java-package-structure/examples.md) |
+| [`java-package-structure`](skills/java-package-structure/SKILL.md) | Java / Spring Boot work | Module-based package layout, rules J-01 to J-11 (including null safety), [before/after example](skills/java-package-structure/examples.md) |
 | [`structure-review`](skills/structure-review/SKILL.md) | Reviewing or refactoring existing code | Scan → report → step-by-step behavior-preserving fixes |
 
 ### Java layout at a glance

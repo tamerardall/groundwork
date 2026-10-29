@@ -23,12 +23,12 @@ A structure refactor moves, splits and inlines code. It does **not** change beha
    - S-02 / J-04: interface code doing business rules or data access, and services using HTTP types.
    - S-03 / J-09: for each private or module-level function, count its call sites with `grep -rnw "<name>"` (exclude the definition). Flag those with exactly one call site where no S-03 exception applies.
    - S-04: `utils` / `helpers` / `common` files holding domain code.
-   - S-05: folders with one file, trivial forwarding files.
+   - S-05: trivial forwarding files, one class per trivial function.
    - S-06: functions or classes with overlapping names or bodies (`grep` the key words of each suspicious one).
    - S-07: `grep -rnE "except Exception|except:|catch \\((Exception|Throwable)|catch \\([^)]*\\) *\\{ *\\}"` for broad and empty catches; log-and-rethrow pairs.
-   - S-08: `grep -rnE "class \\w*(Manager|Handler|Processor|Helper)\\b"` and variables named `data`, `result`, `info`, `temp`.
+   - S-08: `grep -rnE "class (\\w*(Manager|Processor|Helper)|Handler)\\b"` and variables named `data`, `result`, `info`, `temp`.
    - S-09: parameters, options and flags with no caller; interfaces with one implementation that no convention requires.
-   - Java: J-01 to J-10 against java-package-structure.
+   - Java: J-01 to J-11 against java-package-structure.
 4. **Report** before changing anything, in this form:
 
    ```

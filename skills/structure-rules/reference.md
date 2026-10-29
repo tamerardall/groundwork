@@ -65,9 +65,9 @@ Keep the helper separate only when one of these is observably true:
 
 ## S-05: Do not over-split
 
-- **Tell:** a 60-line script spread over eight files; one class per trivial function; folders containing a single file.
+- **Tell:** a 60-line script spread over eight files; one class per trivial function.
 - **Why:** fragmentation is also slop. The reader still jumps around to learn nothing.
-- **Fix:** a single-purpose script under ~150 lines may stay in one file. Split when S-01's signals appear, not before. Create a folder only when it will hold at least two files.
+- **Fix:** a single-purpose script under ~150 lines may stay in one file. Split when S-01's signals appear, not before.
 
 ## S-06: Search before you write
 
@@ -114,11 +114,11 @@ def load_config(path):
 ## S-08: Names say what, not that
 
 - **Tell:**
-  - classes named `*Manager`, `*Handler`, `*Processor`, `*Helper`, `*Util` with no domain word,
+  - classes named `*Manager`, `*Processor`, `*Helper`, `*Util` with no domain word, or a bare `Handler`,
   - variables named `data`, `result`, `info`, `temp`, `obj`, `item2`,
   - functions named `handle()`, `process()`, `doStuff()`.
 - **Why:** the name gives no information, so the reader has to read the body.
-- **Fix:** name things after the domain concept and the action: `InvoiceTotaler`, `unpaidInvoices`, `sendReminder()`. Framework-mandated suffixes (`UserController`, `UserRepository`) are fine.
+- **Fix:** name things after the domain concept and the action: `InvoiceTotaler`, `unpaidInvoices`, `sendReminder()`. Framework and convention names (`UserController`, `UserRepository`, `GlobalExceptionHandler`) are fine, and so is `Handler` when a domain or role word precedes it (`PaymentFailedHandler`).
 
 ## S-09: No speculative code
 

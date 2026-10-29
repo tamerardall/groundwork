@@ -14,10 +14,10 @@ Rules against structural AI slop. Each has an ID (`S-XX`) so reviews can cite it
 - **S-02 Separate the layers.** Interface (HTTP controller, CLI, UI), logic (services, domain) and data/integration (repositories, API clients) live in separate files. Dependencies point downward only.
 - **S-03 Inline single-use helpers.** Before extracting a helper, count its call sites. Exactly one → write the code in place. Keep it separate only if it is a public API, interface or framework callback, is recursive, is passed as a value, has its own tests, would push the caller past ~40 lines or 3 nesting levels, or names a real domain concept.
 - **S-04 No `utils` dumps.** Code goes to the module of the domain that uses it. Shared `util` is only for domain-free, stateless code used by two or more modules.
-- **S-05 Do not over-split.** A single-purpose script under ~150 lines may stay in one file. No folder with a single file.
+- **S-05 Do not over-split.** A single-purpose script under ~150 lines may stay in one file.
 - **S-06 Search before you write.** Before adding a function or class, search the project for its key words (`grep -rniE "price|format" src/`). If a match does the job, call it. If it almost does, extend it.
 - **S-07 Handle errors where you can act on them.** Catch only where the code recovers, adds context, or converts the error into a result. Otherwise let it propagate. Catch specific types. No empty catch blocks, no log-and-rethrow, no null checks on values that cannot be null.
-- **S-08 Names say what, not that.** Name classes, functions and variables after the domain concept and action (`unpaidInvoices`, `sendReminder()`), not `data`, `result`, `handle()`, `*Manager`, `*Helper`. Framework-mandated suffixes (`UserController`) are fine.
+- **S-08 Names say what, not that.** Name classes, functions and variables after the domain concept and action (`unpaidInvoices`, `sendReminder()`), not `data`, `result`, `handle()`, `*Manager`, `*Helper`. Framework and convention names (`UserController`, `GlobalExceptionHandler`) are fine.
 - **S-09 No speculative code.** No parameter, option, flag, generic or interface without a caller in the current task. Add it when the second real use arrives. Framework or team conventions (such as Java's `Service` + `Impl`) are exempt.
 
 ## Delivery check

@@ -65,8 +65,8 @@ com.company.project
 
 ## Rules
 
-### J-01: One public top-level class per file
-Never put a controller and a service, or an entity and its DTO, in the same `.java` file. Nested static classes are allowed only when they are private to the enclosing class.
+### J-01: One top-level class per file
+Never put a controller and a service, or an entity and its DTO, in the same `.java` file, whether or not the extra class is public. The only exception is a nested class that is private to the enclosing class.
 
 ### J-02: A module contains only its own classes
 Everything under `user/` concerns users only. A class used by exactly one module lives in that module, even if it looks generic. A class moves to `common/` only when two or more modules use it **and** it contains no module-specific logic.
@@ -102,19 +102,26 @@ Create a layer package only when it holds a class. A module without a mapper has
 ### J-09: Single-use private methods are inlined (S-03)
 A private method in a service or controller that has one call site is written in place, unless an S-03 exception applies.
 
-### J-10: Null-safe checks and Optional
-Where a value can be null (S-07 decides where), use the null-safe API instead of raw operators:
+### J-10: Optional for "not found"
+A method that may find nothing returns `Optional<T>`, never `null`. Consume it with `map`, `orElseThrow` or `orElse`, not `isPresent()` + `get()`.
 
 | Instead of | Use |
 |---|---|
-| `if (x == null)` / `if (x != null)` | `if (Objects.isNull(x))` / `if (Objects.nonNull(x))` |
-| `a.equals(b)` where `a` may be null | `Objects.equals(a, b)` |
-| `if (x == null) throw new NullPointerException(...)` | `Objects.requireNonNull(x, "x must not be null")` |
-| `x != null ? x : fallback` | `Objects.requireNonNullElse(x, fallback)` |
 | a method that returns `null` for "not found" | return `Optional<T>`: `Optional<User> findByEmail(String email)` |
 | `if (opt.isPresent()) { return opt.get(); }` | `opt.map(...)`, `opt.orElseThrow(...)`, `opt.orElse(...)` |
 
 Use `Optional` only as a return type. Not for fields, method parameters or collections: return an empty list instead of `Optional<List<T>>`.
+
+### J-11: Null-safe helpers where they remove code
+Where a value can be null (S-07 decides where), use `java.util.Objects` when it replaces hand-written null handling:
+
+| Instead of | Use |
+|---|---|
+| `a.equals(b)` where `a` may be null | `Objects.equals(a, b)` |
+| `if (x == null) throw new NullPointerException(...)` | `Objects.requireNonNull(x, "x must not be null")` |
+| `x != null ? x : fallback` | `Objects.requireNonNullElse(x, fallback)` |
+
+A plain `x == null` / `x != null` check stays as it is. Use `Objects::isNull` and `Objects::nonNull` only as method references (`filter(Objects::nonNull)`).
 
 ## Adding a new module
 
@@ -139,5 +146,6 @@ Create only the DTOs and packages that are actually used (J-07). See `examples.m
 | Controller returns `ResponseEntity<User>` | Return `UserDTO` via `UserMapper` (J-05) |
 | `try { ... } catch (NotFound e) { return ResponseEntity.status(404)... }` in a controller | Let it throw and handle it in `GlobalExceptionHandler` (J-06) |
 | `common/util/QuoteUtil.java` used only by quote | Move the code into `quote/service` (J-02, S-04) |
-| `if (customer != null && customer.getEmail() != null)` | `Objects.nonNull(...)`, or return `Optional` from the lookup (J-10) |
+| `if (customer != null && customer.getEmail() != null)` | Return `Optional` from the lookup and use `map` / `orElseThrow` (J-10) |
 | `UserRepository.findByEmail` returns `null` when missing | Return `Optional<User>` and use `orElseThrow` in the service (J-10) |
+| `if (a != null && a.equals(b))` | `Objects.equals(a, b)` (J-11) |
