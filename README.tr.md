@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.svg" width="96" alt="groundwork logosu"></p>
+
 # groundwork
 
 AI kodlama ajanlarının düzgün yapılandırılmış kod üretmesini ve kodu, yaptığı işi değiştirmeden hızlandırmasını sağlayan skill'ler.

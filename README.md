@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.svg" width="96" alt="groundwork logo"></p>
+
 # groundwork
 
 Skills that make AI coding agents produce code with a sane structure, and make it faster without changing what it does.
