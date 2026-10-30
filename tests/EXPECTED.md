@@ -7,7 +7,7 @@ Risk levels: `safe`, `business-decision`, `suspect (not proposed)`.
 
 | Class.method | Expected finding | Pattern | Risk level | Barrier / note | Fail if |
 |---|---|---|---|---|---|
-| `DiscountService.discountFor` | Move the tier lookup below the `amount.signum() <= 0` early return | O-01 | safe | Lookup uses `orElse`, cannot throw a domain error; no writes | Not found; or flagged as changing error order |
+| `DiscountService.discountFor` | Move the tier lookup below the `amount.signum() <= 0` early return | O-01 (O-03 also accepted) | safe, or business-decision **if** the reason is `findById(null)` throwing for `customerId == null, amount <= 0` | Lookup uses `orElse`, cannot throw a domain error; no writes | Not found; or business-decision for any other reason |
 | `InvoiceService.buildInvoice` | Build `InvoiceDraft` after the paid check, next to `render` | O-02 | safe | `forOrder` is pure (no time, ID, I/O). Gain is minor (allocation on failure paths) | Gain overstated as a DB/latency win |
 | `TransferService.transfer` | Validate `amount` before `findAllById` | O-03 | safe | `findAllById` throws no domain error, so error precedence is unchanged | Marked business-decision without noticing `findAllById` cannot throw `NotFoundException` |
 | `RegistrationService.register` | Format check before `existsByEmail` saves a query | O-03 | business-decision | Both checks can fail for the same input (null / legacy malformed email); the returned error changes | Proposed as `safe` |
