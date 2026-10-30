@@ -1,0 +1,13 @@
+{
+  "name": "perf-skills",
+  "description": "Performance skills for AI coding agents: behavior-preserving statement reordering in Spring Boot service methods",
+  "version": "0.1.0",
+  "author": {
+    "name": "Tamer Ardal"
+  },
+  "license": "MIT",
+  "keywords": ["performance", "spring-boot", "jpa", "transactions", "n+1", "refactoring", "java"],
+  "skills": [
+    "./skills/spring-service-ordering"
+  ]
+}
