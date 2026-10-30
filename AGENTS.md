@@ -17,9 +17,11 @@ Reorder statements in Spring service methods to do less work or wait less, **wit
 - **O-01** Query / remote call whose result is used later → move to first use, or only up to a barrier.
 - **O-02** Object built early → build where used (pure constructors only; `now()` is data, it stays).
 - **O-03** Cheap check after expensive call → check first; if both can fail for one input → `business-decision`.
-- **O-04** Remote call inside `@Transactional` → move out of the tx (caller, other bean, `TransactionTemplate`) or to `afterCommit`. In scope even though it crosses the tx boundary.
+- **O-04** Remote call inside `@Transactional` → move it before the first DB access, outside every transaction (caller, other bean, `TransactionTemplate` not nested in another tx). In scope even though it crosses the tx boundary. Pool gain only with `spring.jpa.open-in-view=false`. `afterCommit` only shortens lock time (connection still held) and drops the side effect on commit failure → `business-decision`.
 - **O-05** Query in a loop → one batch query, iterate the original list (duplicates, first-missing-id error kept).
-- **O-06** Independent remote calls in sequence → parallel on a dedicated executor; join in order, unwrap `CompletionException`; ThreadLocal readers stay on the request thread.
+- **O-06** Independent remote calls in sequence → first call (original order) on the request thread, later ones on a dedicated executor; join in order, unwrap `CompletionException`; ThreadLocal readers stay on the request thread. Later calls now run when the first fails → `business-decision`.
+
+Failure paths count: an extra outgoing call when a sibling fails, or a side effect dropped on commit failure, is a behavior change.
 
 ## Barriers (do not cross)
 

@@ -4,6 +4,8 @@ Each pattern lists what to look for, the fix, and the conditions that must all h
 
 "Same observable behavior" means, for every input: same return value, same exception type and message, same writes and outgoing calls with the same arguments. Infrastructure failures (connection loss, timeouts) are not part of the contract; domain outcomes (`NotFoundException`, validation errors, rollback) are.
 
+Failure paths count too. An outgoing call that now happens when a sibling call fails, or a side effect that no longer happens when the commit fails, is a behavior change → `business-decision`, even when it looks harmless or "better".
+
 ---
 
 ## O-01 Defer a call to its first use
@@ -44,6 +46,7 @@ Each pattern lists what to look for, the fix, and the conditions that must all h
 
 **Safe only if:**
 - The check does not read the expensive call's result.
+- The expensive call writes nothing and has no side effect (no `save`, audit row, authorization hold, message). Otherwise invalid requests stop producing it → `business-decision`.
 - The expensive call cannot fail with its own domain exception for the same input. Example: `findAllById` returns fewer rows instead of throwing, so an amount check can go first. `existsByEmail` + throw is a failure path, so it cannot.
 
 **If both can fail for one input, the level is `business-decision`.** The order decides which error the client sees. That choice belongs to the product owner, even when the new order looks "more correct". State both messages and which input triggers each.
@@ -54,18 +57,27 @@ Each pattern lists what to look for, the fix, and the conditions that must all h
 
 **Tell:** A remote call (HTTP, mail, payment, message broker, file I/O) runs inside `@Transactional` — on the method **or on the class**.
 
-**Why:** The DB connection is held for the full latency of the remote call. Under load the pool runs dry. This is a statement-placement problem even though the fix moves code across the transaction boundary; it is in scope.
+**Why:** The transaction — its row locks and its pooled connection — stays open for the full latency of the remote call. This is a statement-placement problem even though the fix moves code across the transaction boundary; it is in scope.
+
+**Know what is actually released.** Spring's JPA setup acquires the connection at the first DB access and holds it until the EntityManager closes. With `spring.jpa.open-in-view=true` (the default in web apps) that is the end of the HTTP request. State the gain per fix:
+
+| Remote call moved to | Gain |
+|---|---|
+| Before the first DB access, outside every transaction | Shorter tx and lock time. Shorter pool time **only if** open-in-view is off |
+| After the commit (`afterCommit`, after a `TransactionTemplate`) | Shorter tx and lock time only. The connection is still held during `afterCommit`, and the request still waits for the call. Never report this as pool or latency gain |
 
 **Fix, pick one:**
 - Call the remote service before the transaction: in the caller, or in a separate bean whose `@Transactional` method does the DB part.
 - `TransactionTemplate` around the DB part only.
 - Side effects that must follow a successful write: `TransactionSynchronizationManager.registerSynchronization(... afterCommit ...)` or `@TransactionalEventListener(phase = AFTER_COMMIT)`.
 
+**Check that the new placement is really outside every transaction.** A `TransactionTemplate` (REQUIRED) inside a method that is still transactional — by its own annotation, the class annotation, or a transactional caller — joins that transaction and narrows nothing. `NOT_SUPPORTED` suspends an outer transaction instead: the DB part then runs on another connection and misses the outer transaction's uncommitted writes (B4) → not proposed.
+
 **Safe only if:**
 - The remote call's failure was not meant to roll back the transaction. If a thrown exception currently undoes the writes (payment, reservation), moving it out changes the business rule → not proposed.
 - The new transactional method is reached through the Spring proxy. A `this.helper()` call to a `@Transactional` method starts no transaction (safety.md B8).
 - Lazy associations the code touches stay inside the transaction (B3).
-- For `afterCommit`: say that the side effect no longer happens when the commit fails (usually a fix, still a change), and read any entity values before the commit.
+- For `afterCommit`: the side effect no longer happens when the commit fails. That is a failure-path change → `business-decision`, even when it looks like a fix. Read any entity values before the commit.
 - `registerSynchronization` throws `IllegalStateException` when no transaction synchronization is active (the method called without the proxy, or from a test without a transaction). Either keep the call reachable only through `@Transactional`, or use `@TransactionalEventListener(phase = AFTER_COMMIT, fallbackExecution = true)`. State which in the report.
 - Inside an outer transaction, `afterCommit` waits for the **outer** commit. Say so.
 
@@ -93,13 +105,13 @@ Each pattern lists what to look for, the fix, and the conditions that must all h
 
 **Why:** Latency becomes the maximum instead of the sum.
 
-**Fix:** `CompletableFuture.supplyAsync(..., executor)` for all but one call; run one on the current thread; join in the original order.
+**Fix:** Start every call **except the first** (in the original order) with `CompletableFuture.supplyAsync(..., executor)`, run the first one on the current thread, then join the futures in the original order. If both the first and a later call fail, the first call's exception is still the one thrown, as before. Running a later call on the current thread while an earlier one is async flips the error when both fail (B7).
 
 **Safe only if — all of these, and say each one in the report:**
 - A dedicated, bounded executor bean. Never the common pool.
 - No repository call or lazy access moves to the pool thread (transactions and the persistence context are thread-bound).
 - Nothing moved to the pool reads a ThreadLocal: `SecurityContextHolder`, MDC, tenant context, `RequestContextHolder`. Keep such a call on the request thread, or propagate the context (`DelegatingSecurityContextExecutor`).
 - Exceptions: join in the original order and unwrap `CompletionException`, so callers see the same exception type.
-- State that on failure the other call now runs anyway (extra load on that service).
+- State that on failure the later calls now run anyway.
 
-Default level: `safe` only when every bullet is checked and written down; otherwise `business-decision`.
+Level: `business-decision` when every bullet above is checked and written down — the later calls now run even when the first one fails, which is a failure-path change. If any bullet cannot be checked: `suspect (not proposed)`.

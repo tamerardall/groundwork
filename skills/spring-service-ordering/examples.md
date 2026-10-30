@@ -78,7 +78,7 @@ public void activate(Long customerId) {
     });
 ```
 
-Report note: no mail when the commit fails. Test: `@SpringBootTest` with `@MockitoBean MailClient`, no test-level transaction, so the commit really happens.
+Risk: `business-decision` — no mail when the commit fails. Gain: the transaction (and its row lock) ends ~300 ms sooner. Not a pool or latency gain: the connection is still held during `afterCommit`, and the request still waits for the mail. Test: `@SpringBootTest` with `@MockitoBean MailClient`, no test-level transaction, so the commit really happens.
 
 Counter-example: `paymentGateway.charge(...)` after `order.setStatus("PAID")` — a declined payment must roll the status back (B11). Not proposed.
 
@@ -95,13 +95,14 @@ for (Long id : productIds) {                                  // original list: 
 }
 ```
 
-## O-06 Parallel, ThreadLocal users stay home
+## O-06 Parallel: the first call stays home
 
 ```java
+// original order: displayName (1st), points (2nd)
 CompletableFuture<Integer> points = CompletableFuture.supplyAsync(
-        () -> loyaltyClient.points(customerId), remoteCallExecutor);   // dedicated, bounded
-String displayName = authHeaderClient.displayName();                 // reads SecurityContextHolder: request thread
+        () -> loyaltyClient.points(customerId), remoteCallExecutor);   // later call: async, dedicated executor
+String displayName = authHeaderClient.displayName();                 // 1st call: request thread (also reads SecurityContextHolder)
 return new ProfileView(displayName, join(points));                    // join unwraps CompletionException
 ```
 
-Report note: an unauthenticated request now also sends a loyalty call before it fails.
+The first call of the original order runs on the request thread, so when both fail its exception still wins. Risk: `business-decision` — an unauthenticated request now also sends a loyalty call before it fails.

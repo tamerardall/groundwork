@@ -44,3 +44,16 @@ Reported the finding, then refused to edit: no test dependency and no `src/test`
 | O-04 transaction-narrowing findings | 0 of 4 | 4 of 4 |
 | Risk level per finding | none | all |
 | Stops for approval before editing | not measurable | yes (`main`, `no-tests`) |
+
+# With skill — iteration 2, after the final review fixes (2026-10-30)
+
+The final review found six Important gaps (O-04 gain claims under Spring Boot's connection handling and open-in-view, `TestTransaction.end()` rolling back, O-06 error precedence, failure-path changes graded `safe`, O-03 side effects, nested transactions). Iteration 1 was the failing evidence for three of them: it graded `WelcomeService` `safe` with "~300 ms less connection hold", and made `quote` async while keeping `available` synchronous in `DashboardService`. After the fixes, the answer key rows for Welcome, Dashboard and Catalog were tightened and `main` was re-run in a fresh subagent.
+
+| Class.method | Iteration 1 | Iteration 2 |
+|---|---|---|
+| `WelcomeService.activate` | safe, "~300 ms less connection hold" | **business-decision**, gain = shorter tx/lock only, "connection is held during `afterCommit`" |
+| `DashboardService.summary` | safe, `quote` async + `available` sync | **business-decision**, `quote` (first call) on the request thread, `available` async |
+| `CatalogService.list` | safe, drop class annotation | safe, drop class annotation, gain limited by open-in-view, no nested `TransactionTemplate`, no `NOT_SUPPORTED` |
+| Other 11 rows | pass | pass (no regression) |
+
+Iteration 2 checked `spring.jpa.open-in-view` on its own (not set → on with webmvc) and scoped every O-04 gain to transaction and lock time. Result: 14 / 14, ended at the approval line, copy unedited.
