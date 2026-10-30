@@ -19,7 +19,7 @@ A change you cannot show to be behavior-preserving is not proposed as `safe`. De
 ## Workflow
 
 1. **Map** each statement of the method: `reads | writes | side effect | can throw (domain) | in tx | depends on`. Open the clients, repositories, entities and the class annotations it touches. [safety.md](safety.md) lists what to look for.
-2. **Match** against the patterns. Load [patterns.md](patterns.md) for the conditions.
+2. **Match** against the patterns. Load [patterns.md](patterns.md) for the conditions and [examples.md](examples.md) for worked before/after cases.
 3. **Check barriers** for every candidate move: [safety.md](safety.md). A barrier between the old and new position either stops the move or makes it partial.
 4. **Report** in the format below. **Stop. Make no edits until the user approves specific findings.**
 5. **Test gate**, per approved method, before touching it:
@@ -28,7 +28,8 @@ A change you cannot show to be behavior-preserving is not proposed as `safe`. De
    - O-04 changes need a test that runs a real transaction and commits (`@SpringBootTest` / `@DataJpaTest` with the remote client as `@MockitoBean`, and `TestTransaction.end()` or no test-level transaction). A mock-only unit test never fires `afterCommit`.
    - Run it on the **unchanged** code. It must be green. Red means the test is wrong; fix the test, not the code.
    - No test infrastructure in the project (no test dependency, no runner)? Do not edit. Say what is missing, propose adding it, and wait. Pre-approval of "the change" does not cover adding dependencies.
-6. **Apply** one finding at a time. Run the tests after each. Red → revert that change, report it, continue with the next.
+   - Approved `business-decision`: before touching the code, change the assertion for exactly the accepted input to the new outcome (and name the test in the report). That one test is now red on the old code — expected. Every other test stays as it was.
+6. **Apply** one finding at a time. Run the tests after each. Any red → revert that change, report it, continue with the next. Never edit a test after a red run to make it pass; a red test after the change means behavior changed beyond what was approved.
 7. **Final report:** applied, reverted, skipped — each with the reason and the test command + result.
 
 ## Risk levels

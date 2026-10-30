@@ -66,6 +66,8 @@ Each pattern lists what to look for, the fix, and the conditions that must all h
 - The new transactional method is reached through the Spring proxy. A `this.helper()` call to a `@Transactional` method starts no transaction (safety.md B8).
 - Lazy associations the code touches stay inside the transaction (B3).
 - For `afterCommit`: say that the side effect no longer happens when the commit fails (usually a fix, still a change), and read any entity values before the commit.
+- `registerSynchronization` throws `IllegalStateException` when no transaction synchronization is active (the method called without the proxy, or from a test without a transaction). Either keep the call reachable only through `@Transactional`, or use `@TransactionalEventListener(phase = AFTER_COMMIT, fallbackExecution = true)`. State which in the report.
+- Inside an outer transaction, `afterCommit` waits for the **outer** commit. Say so.
 
 ---
 
