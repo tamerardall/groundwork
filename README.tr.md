@@ -1,4 +1,4 @@
-# unslop-skills
+# groundwork
 
 AI kodlama ajanlarının düzgün yapılandırılmış kod üretmesini ve kodu, yaptığı işi değiştirmeden hızlandırmasını sağlayan skill'ler.
 
@@ -55,15 +55,15 @@ Ayrıntılar: [`tests/results/`](tests/results/).
 ### Claude Code (plugin)
 
 ```
-/plugin marketplace add tamerardall/unslop-skills
-/plugin install unslop-skills@unslop-skills
+/plugin marketplace add tamerardall/groundwork
+/plugin install groundwork@groundwork
 ```
 
 Ya da repoyu klonlayıp istediğin skill'leri symlink'le:
 
 ```bash
-git clone https://github.com/tamerardall/unslop-skills.git
-ln -s "$PWD/unslop-skills/skills/structure-rules" ~/.claude/skills/structure-rules
+git clone https://github.com/tamerardall/groundwork.git
+ln -s "$PWD/groundwork/skills/structure-rules" ~/.claude/skills/structure-rules
 ```
 
 ### Codex, Copilot, Gemini CLI, Cursor vb.
@@ -75,7 +75,7 @@ ln -s "$PWD/unslop-skills/skills/structure-rules" ~/.claude/skills/structure-rul
 - Genel LLM kodlama davranışı için [karpathy-guidelines](https://github.com/forrestchang/andrej-karpathy-skills)
 - `antislop-code` gibi yorum hijyeni skill'leri
 
-unslop-skills **yapı** (dosya, paket ve fonksiyon sınırları) ve **davranışı aynen koruyan performans** ile ilgilenir. SQL ayarı yapmaz, cache eklemez, API değiştirmez.
+groundwork **yapı** (dosya, paket ve fonksiyon sınırları) ve **davranışı aynen koruyan performans** ile ilgilenir. SQL ayarı yapmaz, cache eklemez, API değiştirmez.
 
 ## Katkı
 

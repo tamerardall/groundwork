@@ -1,4 +1,4 @@
-# unslop-skills
+# groundwork
 
 Skills that make AI coding agents produce code with a sane structure, and make it faster without changing what it does.
 
@@ -55,15 +55,15 @@ Details: [`tests/results/`](tests/results/).
 ### Claude Code (plugin)
 
 ```
-/plugin marketplace add tamerardall/unslop-skills
-/plugin install unslop-skills@unslop-skills
+/plugin marketplace add tamerardall/groundwork
+/plugin install groundwork@groundwork
 ```
 
 Or clone the repository and symlink the skills you want:
 
 ```bash
-git clone https://github.com/tamerardall/unslop-skills.git
-ln -s "$PWD/unslop-skills/skills/structure-rules" ~/.claude/skills/structure-rules
+git clone https://github.com/tamerardall/groundwork.git
+ln -s "$PWD/groundwork/skills/structure-rules" ~/.claude/skills/structure-rules
 ```
 
 ### Codex, Copilot, Gemini CLI, Cursor and others
@@ -75,7 +75,7 @@ Copy [`AGENTS.md`](AGENTS.md) to the root of your project, or append it to your 
 - [karpathy-guidelines](https://github.com/forrestchang/andrej-karpathy-skills) for general LLM coding behavior
 - comment-hygiene skills such as `antislop-code`
 
-unslop-skills deals with **structure** (file, package and function boundaries) and with **performance that keeps behavior identical**. It does not tune SQL, add caches or change APIs.
+groundwork deals with **structure** (file, package and function boundaries) and with **performance that keeps behavior identical**. It does not tune SQL, add caches or change APIs.
 
 ## Contributing
 

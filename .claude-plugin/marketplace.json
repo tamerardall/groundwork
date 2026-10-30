@@ -1,6 +1,6 @@
 {
-  "name": "unslop-skills",
-  "id": "unslop-skills",
+  "name": "groundwork",
+  "id": "groundwork",
   "owner": {
     "name": "Tamer Ardal"
   },
@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "unslop-skills",
+      "name": "groundwork",
       "source": "./",
       "description": "No god files, separated layers, inlined single-use helpers, module-based Java package structure, a structure review workflow, and behavior-preserving statement reordering for Spring Boot services",
       "version": "0.3.0",

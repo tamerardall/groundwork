@@ -1,6 +1,6 @@
 # Code Structure and Performance Rules for AI Agents
 
-Condensed version of the unslop-skills rules for agents that read `AGENTS.md` (Codex, Copilot, Gemini CLI, Cursor and others). The full versions live in `skills/`.
+Condensed version of the groundwork rules for agents that read `AGENTS.md` (Codex, Copilot, Gemini CLI, Cursor and others). The full versions live in `skills/`.
 
 ## Core rules (any language)
 
