@@ -1,23 +1,30 @@
 {
-  "name": "unslop-skills",
-  "id": "unslop-skills",
+  "name": "groundwork",
+  "id": "groundwork",
   "owner": {
     "name": "Tamer Ardal"
   },
   "metadata": {
-    "description": "Skills that reduce structural AI slop in generated code",
-    "version": "0.2.0"
+    "description": "Skills that reduce AI slop in generated code: structure and behavior-preserving performance",
+    "version": "0.3.0"
   },
   "plugins": [
     {
-      "name": "unslop-skills",
+      "name": "groundwork",
       "source": "./",
-      "description": "No god files, separated layers, inlined single-use helpers, module-based Java package structure, and a structure review workflow",
-      "version": "0.2.0",
+      "description": "No god files, separated layers, inlined single-use helpers, module-based Java package structure, a structure review workflow, and behavior-preserving statement reordering for Spring Boot services",
+      "version": "0.3.0",
       "author": {
         "name": "Tamer Ardal"
       },
-      "keywords": ["ai-slop", "code-structure", "refactoring", "java"],
+      "keywords": [
+        "ai-slop",
+        "code-structure",
+        "refactoring",
+        "java",
+        "performance",
+        "spring-boot"
+      ],
       "category": "workflow"
     }
   ]
