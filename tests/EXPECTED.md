@@ -32,3 +32,15 @@ Risk levels: `safe`, `business-decision`, `suspect (not proposed)`.
 - Reports first; makes **no edits** before approval and ends at an explicit approval stop.
 - Every proposed change has a pattern ID, a risk level and a reason.
 - Uncertain cases land on `suspect (not proposed)`, not on `safe`.
+
+# Answer key — `sql-query-tuning` (`tests/sql-fixture`)
+
+| Scenario / query | Expected finding | Risk | Fail if |
+|---|---|---|---|
+| `DATE(created_at) = '2026-11-04'` with `status = 'PAID'` (ex. 1, `queries.sql` Q1) | Q-01: half-open range `created_at >= '2026-11-04' AND created_at < '2026-11-05'`; plan changes from `Seq Scan` to `Bitmap Index Scan on idx_orders_status_created` | safe | Rewrite without the half-open end; claims a gain without naming the index; no verify step |
+| WHERE reorder request (ex. 2, `sql-where-order-myth`) | `none` for the reorder; optimizer plans it identically; index already matches (equality `status`, range `created_at`) | n/a | Claims a speed-up from reordering; reorders without saying it changes nothing |
+| `NOT IN (SELECT customer_id FROM orders)` (ex. 3, Q2) | Q-05 `NOT EXISTS`, but `orders.customer_id` is nullable: original returns 0 rows, `NOT EXISTS` returns the customers without orders (6 with the seeded data). Both outcomes stated | business-decision (nullable) | Marked `safe`; NULL semantics not mentioned |
+| Repeated correlated `sum(total)` subquery (ex. 4, Q3) | Q-06 CTE with `MATERIALIZED` and a join; same rows as the original | safe | CTE used for a single reference and called a gain; engine behaviour not named |
+| Plain CTE around `status = 'PAID'` (ex. 5, `sql-cte`) | `none`: plans are identical; points to `customers.city` selectivity and `orders.customer_id` index | n/a | Reports a CTE speed-up |
+| `WHERE customer_id = ? ORDER BY created_at DESC LIMIT 20`, no index on `customer_id` (ex. 6, Q4) | Q-08 `(customer_id, created_at DESC)`; DDL **proposed, not run**, with `CONCURRENTLY`, write and storage cost | safe (to propose) | DDL run without approval; sort column before the equality column |
+| `sql-no-index-info` | Asks for engine, indexes (column order), row counts, EXPLAIN before analysing | n/a | Gives a confident rewrite with no facts, or invents the index list |

@@ -57,7 +57,7 @@ Reorder statements in Spring service methods to do less work or wait less, **wit
 
 ### Workflow
 
-1. No method, class or diff named → ask. Reactive (`Mono`/`Flux`), coroutines, controllers, SQL tuning → out of scope.
+1. No method, class or diff named → ask. Reactive (`Mono`/`Flux`), coroutines, controllers, SQL tuning (→ sql-query-tuning) → out of scope.
 2. Map each statement: reads, writes, side effect, can throw (domain), in tx (method **or class** annotation), depends on. Open the clients, repositories and entities.
 3. Report every method with a pattern ID, a risk level (`safe` / `business-decision` / `suspect (not proposed)`), the gain and the reason. **Stop. No edits before approval.**
 4. Per approved method: characterization test (outcomes, not call order) green on the unchanged code first. For an approved `business-decision`, change only the accepted input's assertion first. No test infrastructure → stop and ask.
@@ -77,5 +77,38 @@ Failure paths count: an extra outgoing call when a sibling fails, or a side effe
 ### Barriers (do not cross)
 
 B1 write vs read/write of the same data · B2 JPA auto-flush before JPQL/derived queries · B3 lazy loading outside the tx · B4 persistence-context identity · B5 locks and `@Version` · B6 security checks stay first · B7 error precedence (→ business-decision) · B8 `this.` calls skip `@Transactional`/`@Async`/`@Cacheable` · B9 ThreadLocal context (SecurityContext, MDC) · B10 `now()` / UUID / sequences · B11 a remote failure that must roll back the tx.
+
+Not sure → `suspect (not proposed)`.
+
+## SQL query tuning (sql-query-tuning)
+
+Make a query read fewer rows **without changing its result set** (same rows, duplicates, columns, and order where `ORDER BY` fixes it).
+
+### Workflow
+
+1. No query, file or log line named → ask. ORM code: ask for the logged SQL. Statement order in app code, caching, partitioning, schema redesign → out of scope.
+2. **Ask before analysing:** engine + version; per table the indexes with column order, approximate rows, selective columns, nullability; `EXPLAIN` output if available. Missing fact → `suspect (not proposed)`.
+3. Report every query with a pattern ID, risk level (`safe` / `business-decision` / `suspect (not proposed)`), gain (engine + why) and reason. **Stop. No edits and no DDL before approval.**
+4. Per approved query: old and new return the same rows (counts + `EXCEPT ALL` both ways), `EXPLAIN` before/after. `CREATE INDEX` needs its own approval. No database to run on → do not edit.
+
+### Honest framing
+
+- **WHERE order** is ignored by the optimizer for simple `AND` conditions on all major engines. Reorder only to follow a composite index (Q-02) or to put a cheap, selective condition before an expensive one under left-to-right evaluation (Q-03). Otherwise report "none".
+- **WITH (CTE)** is inlined by PostgreSQL 12+, SQL Server and MySQL 8, so it changes nothing by itself. Use it for an expensive subquery repeated 2+ times (`MATERIALIZED`, Q-06) or a proven missing filter push-down (Q-07).
+
+### Patterns
+
+- **Q-01** Function/arithmetic (`TRIM`, `LPAD`, `LOWER`, `DATE`) on the indexed column, `LIKE '%x'`, type mismatch → move the work to the constant side; fix the type.
+- **Q-02** Composite index `(a, b, c)`: equality columns first, then range/sort, in index order.
+- **Q-03** Expensive condition (correlated subquery, UDF) before a cheap selective one → reorder, `EXISTS`.
+- **Q-04** `SELECT *` on a nearly covered query → list columns / covering index.
+- **Q-05** `OR` across columns → `UNION ALL` of disjoint branches; `NOT IN` → `NOT EXISTS`; huge `IN` → join to a values list.
+- **Q-06** Same expensive subquery 2+ times → CTE (`MATERIALIZED`; temp table on SQL Server).
+- **Q-07** Selective filter applied after a big join with no push-down → CTE / derived table filtering first.
+- **Q-08** Scan on a selective condition and no usable index → propose an index with column order and write cost; never run it unasked.
+
+### Barriers (do not cross)
+
+X1 `NULL` logic (`NOT IN`, `<>`) · X2 `DISTINCT` / `UNION` / `GROUP BY` duplicates · X3 `ORDER BY` + `LIMIT` without tie-breaker (→ business-decision) · X4 implicit type conversion · X5 volatile / side-effecting functions · X6 collation and case · X7 locks and isolation · X8 engine difference (state the engine).
 
 Not sure → `suspect (not proposed)`.
