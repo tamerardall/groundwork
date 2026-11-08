@@ -14,7 +14,7 @@ A change you cannot show to be behavior-preserving is not proposed as `safe`. De
 
 - **In scope:** service-layer methods in Spring (MVC, Data JPA, `@Transactional`). Moving code across a transaction boundary (O-04) and out of a loop (O-05) **is** reordering and is in scope.
 - **Ask first:** if the user names no method, class or diff, ask for one. Do not scan the whole project on your own.
-- **Out of scope — say so and stop:** reactive code (`Mono`, `Flux`, WebFlux), Kotlin coroutines, controllers, SQL tuning, caching, indexes. You may name them as separate ideas, outside the report.
+- **Out of scope — say so and stop:** reactive code (`Mono`, `Flux`, WebFlux), Kotlin coroutines, controllers, caching. SQL tuning and indexes belong to the `sql-query-tuning` skill. You may name them as separate ideas, outside the report.
 
 ## Workflow
 
